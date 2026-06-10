@@ -5,6 +5,15 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
         .setup(|app| {
+            #[cfg(target_os = "windows")]
+            {
+                use tauri::Manager;
+
+                if let Some(window) = app.get_webview_window("main") {
+                    window.set_decorations(false)?;
+                }
+            }
+
             if cfg!(debug_assertions) {
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()

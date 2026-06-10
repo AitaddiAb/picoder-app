@@ -23,30 +23,47 @@ button {
   cursor: pointer;
 }
 
-.desktop-window-control {
+.windows-caption-controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  height: 2.25rem;
+  overflow: hidden;
+}
+
+.windows-caption-button {
   display: grid;
-  height: 1.55rem;
-  width: 1.55rem;
+  width: 2.875rem;
+  height: 2.25rem;
   place-items: center;
-  border: 1px solid rgb(120 113 108 / 0.45);
-  border-radius: 999px;
-  background: rgb(0 0 0 / 0.28);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: rgb(245 245 244 / 0.88);
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', 'Segoe UI Symbol', sans-serif;
+  font-size: 0.625rem;
+  line-height: 1;
   transition:
-    transform 160ms ease,
-    border-color 160ms ease,
-    background-color 160ms ease;
+    background-color 90ms ease,
+    color 90ms ease;
 }
 
-.desktop-window-control:hover {
-  transform: translateY(-1px);
+.windows-caption-button:hover {
+  background: rgb(255 255 255 / 0.12);
+  color: #ffffff;
 }
 
-.desktop-window-control svg {
-  height: 0.78rem;
-  width: 0.78rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.8;
+.windows-caption-button:active {
+  background: rgb(255 255 255 / 0.18);
 }
+
+.windows-caption-close:hover {
+  background: #c42b1c;
+  color: #ffffff;
+}
+
+.windows-caption-close:active {
+  background: #a82419;
+}
+

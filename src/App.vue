@@ -1,5 +1,6 @@
 <script setup>
 import { getCurrentWindow } from '@tauri-apps/api/window'
+import { platform as osPlatform } from '@tauri-apps/plugin-os'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useAuthStore } from './stores/auth'
 import { useSessionsStore } from './stores/sessions'
@@ -12,6 +13,7 @@ const activeMenu = ref('code')
 const sessionListOpen = ref(false)
 const transcriptEl = ref(null)
 const isDesktop = ref(false)
+const desktopPlatform = ref('')
 const appWindow = getCurrentWindow()
 
 const routePath = computed(() => window.location.pathname)
@@ -20,6 +22,8 @@ const firstName = computed(() => auth.user?.name?.split(' ')[0] ?? 'Operator')
 const activeSession = computed(() => sessions.activeSession)
 const activeMessages = computed(() => activeSession.value?.messages ?? [])
 const canUseConsole = computed(() => auth.isAuthenticated || import.meta.env.DEV)
+const isMacDesktop = computed(() => desktopPlatform.value === 'macos')
+const isWindowsDesktop = computed(() => desktopPlatform.value === 'windows')
 
 /**
  * Send the browser to Laravel's single Google login/register endpoint.
@@ -73,12 +77,12 @@ async function scrollTranscriptToBottom() {
 }
 
 /**
- * Drive Tauri's frameless desktop window controls. No-op in the browser.
+ * Drive Windows web-caption controls. macOS uses native traffic lights.
  *
  * @param {'minimize'|'maximize'|'close'} action Window action to perform.
  */
 async function controlDesktopWindow(action) {
-  if (!isDesktop.value) return
+  if (!isWindowsDesktop.value) return
 
   if (action === 'minimize') return appWindow.minimize()
   if (action === 'maximize') return appWindow.toggleMaximize()
@@ -90,6 +94,9 @@ watch(() => sessions.activeSessionId, scrollTranscriptToBottom)
 
 onMounted(async () => {
   isDesktop.value = Boolean(window.__TAURI_INTERNALS__ || window.__TAURI__)
+  if (isDesktop.value) {
+    desktopPlatform.value = osPlatform()
+  }
 
   const params = new URLSearchParams(window.location.search)
   const token = params.get('token')
@@ -118,19 +125,20 @@ onMounted(async () => {
 
     <div
       v-if="isDesktop"
-      class="fixed inset-x-0 top-0 z-[70] flex h-9 items-center justify-end border-b border-lime-200/10 bg-[#050705]/80 px-2 backdrop-blur-xl"
+      class="fixed inset-x-0 top-0 z-[70] flex h-9 items-center justify-center border-b border-lime-200/10 bg-[#050705]/80 px-3 backdrop-blur-xl"
+      :class="isMacDesktop ? 'pl-20' : isWindowsDesktop ? 'pr-[8.625rem]' : ''"
       data-tauri-drag-region
     >
-      <div class="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 font-mono text-[10px] uppercase tracking-[0.34em] text-lime-200/35 sm:block" data-tauri-drag-region>Picoder</div>
-      <div class="flex items-center gap-1.5">
-        <button class="desktop-window-control text-amber-100 hover:border-amber-300/45 hover:bg-amber-300/20" type="button" aria-label="Minimize window" title="Minimize" @click="controlDesktopWindow('minimize')">
-          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.25 6.25h7.5" /></svg>
+      <div class="pointer-events-none font-mono text-[10px] uppercase tracking-[0.34em] text-lime-200/35" data-tauri-drag-region>Picoder</div>
+      <div v-if="isWindowsDesktop" class="windows-caption-controls">
+        <button class="windows-caption-button" type="button" aria-label="Minimize window" title="Minimize" @click="controlDesktopWindow('minimize')">
+          <span aria-hidden="true">&#xE921;</span>
         </button>
-        <button class="desktop-window-control text-lime-100 hover:border-lime-300/45 hover:bg-lime-300/20" type="button" aria-label="Toggle maximize window" title="Maximize" @click="controlDesktopWindow('maximize')">
-          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.25 3.25h5.5v5.5h-5.5z" /></svg>
+        <button class="windows-caption-button" type="button" aria-label="Maximize window" title="Maximize" @click="controlDesktopWindow('maximize')">
+          <span aria-hidden="true">&#xE922;</span>
         </button>
-        <button class="desktop-window-control text-red-100 hover:border-red-300/45 hover:bg-red-400/25" type="button" aria-label="Close window" title="Close" @click="controlDesktopWindow('close')">
-          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.2 3.2l5.6 5.6M8.8 3.2L3.2 8.8" /></svg>
+        <button class="windows-caption-button windows-caption-close" type="button" aria-label="Close window" title="Close" @click="controlDesktopWindow('close')">
+          <span aria-hidden="true">&#xE8BB;</span>
         </button>
       </div>
     </div>
