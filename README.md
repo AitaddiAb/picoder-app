@@ -1,5 +1,71 @@
-# Vue 3 + Vite
+# Picoder App
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Vue + Vite frontend for PiCoder, packaged for browser, Tauri desktop, and Capacitor Android.
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## Development
+
+```bash
+pnpm install
+pnpm serve
+```
+
+## Build
+
+```bash
+pnpm build
+```
+
+## Desktop
+
+Run Tauri dev:
+
+```bash
+pnpm desktop:serve
+```
+
+Build desktop bundles:
+
+```bash
+pnpm macos:build
+pnpm windows:build
+```
+
+## Android
+
+Open Android project:
+
+```bash
+pnpm android:open
+```
+
+Build Android APK:
+
+```bash
+pnpm android:build
+```
+
+## App Icons / Splash Assets
+
+Source logo:
+
+```text
+assets/logo.png
+```
+
+Regenerate Tauri desktop icons:
+
+```bash
+pnpm tauri icon assets/logo.png
+```
+
+Regenerate Capacitor Android icons and splash screens:
+
+```bash
+pnpm capacitor-assets generate --android --androidProject src-cap/android
+```
+
+After regenerating Android assets, sync Capacitor if needed:
+
+```bash
+pnpm cap sync android
+```
