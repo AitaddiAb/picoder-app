@@ -1,22 +1,10 @@
 <script setup>
-import AppHeader from '../Components/App/AppHeader.vue'
-
-defineProps({
-  isDesktop: { type: Boolean, default: false },
-  isMacDesktop: { type: Boolean, default: false },
-  isWindowsDesktop: { type: Boolean, default: false },
-})
-
-const emit = defineEmits(['window-control'])
+import AppHeader from "@/Views/Components/App/AppHeader.vue";
 </script>
 
 <template>
-  <AppHeader
-    :is-desktop="isDesktop"
-    :is-mac-desktop="isMacDesktop"
-    :is-windows-desktop="isWindowsDesktop"
-    :can-use-console="false"
-    @window-control="emit('window-control', $event)"
-  />
-  <slot />
+  <div class="flex h-full min-h-0 w-full flex-col">
+    <AppHeader :can-use-console="false" />
+    <router-view />
+  </div>
 </template>

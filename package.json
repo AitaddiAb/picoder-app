@@ -45,5 +45,9 @@
     "onlyBuiltDependencies": [
       "sharp"
     ]
+  },
+  "dependencies": {
+    "@lucide/vue": "^1.17.0",
+    "vue-router": "^5.1.0"
   }
 }

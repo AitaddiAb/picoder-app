@@ -53,8 +53,6 @@ button {
   border-radius: 0;
   background: transparent;
   color: rgb(245 245 244 / 0.88);
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', 'Segoe UI Symbol', sans-serif;
-  font-size: 0.625rem;
   line-height: 1;
   transition:
     background-color 90ms ease,
@@ -77,5 +75,28 @@ button {
 
 .windows-caption-close:active {
   background: #a82419;
+}
+
+.layout-scrim-enter-active,
+.layout-scrim-leave-active {
+  transition: opacity 180ms ease;
+}
+
+.layout-scrim-enter-from,
+.layout-scrim-leave-to {
+  opacity: 0;
+}
+
+.sidebar-overlay-enter-active,
+.sidebar-overlay-leave-active {
+  transition:
+    transform 200ms ease,
+    opacity 200ms ease;
+}
+
+.sidebar-overlay-enter-from,
+.sidebar-overlay-leave-to {
+  opacity: 0;
+  transform: translateX(-10px);
 }
 
