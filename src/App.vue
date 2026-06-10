@@ -2,6 +2,10 @@
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { platform as osPlatform } from '@tauri-apps/plugin-os'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import AuthLayout from './Views/Layouts/AuthLayout.vue'
+import MainLayout from './Views/Layouts/MainLayout.vue'
+import LoginPage from './Views/Pages/Auth/LoginPage.vue'
+import ChatPage from './Views/Pages/Code/ChatPage.vue'
 import { useAuthStore } from './stores/auth'
 import { useSessionsStore } from './stores/sessions'
 
@@ -9,9 +13,8 @@ const auth = useAuthStore()
 const sessions = useSessionsStore()
 
 const prompt = ref('')
-const activeMenu = ref('code')
 const sessionListOpen = ref(false)
-const transcriptEl = ref(null)
+const chatPage = ref(null)
 const isDesktop = ref(false)
 const desktopPlatform = ref('')
 const appWindow = getCurrentWindow()
@@ -40,14 +43,6 @@ function moveHome() {
 }
 
 /**
- * Open the Code section and reveal the session list on compact screens.
- */
-function openCodeMenu() {
-  activeMenu.value = 'code'
-  sessionListOpen.value = true
-}
-
-/**
  * Select a coding session and close the mobile session drawer.
  *
  * @param {string} sessionId Session selected from the sidebar list.
@@ -71,9 +66,7 @@ async function submitPrompt() {
  */
 async function scrollTranscriptToBottom() {
   await nextTick()
-  if (transcriptEl.value) {
-    transcriptEl.value.scrollTop = transcriptEl.value.scrollHeight
-  }
+  chatPage.value?.scrollToBottom()
 }
 
 /**
@@ -116,173 +109,45 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="min-h-screen overflow-hidden bg-[#070907] text-stone-100 selection:bg-lime-300 selection:text-black">
-    <div class="pointer-events-none fixed inset-0 opacity-70">
-      <div class="absolute left-[-12rem] top-[-12rem] h-96 w-96 rounded-full bg-lime-400/20 blur-3xl"></div>
-      <div class="absolute bottom-[-10rem] right-[-8rem] h-[30rem] w-[30rem] rounded-full bg-emerald-500/15 blur-3xl"></div>
-      <div class="absolute inset-0 bg-[linear-gradient(rgba(190,255,130,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(190,255,130,0.045)_1px,transparent_1px)] bg-[size:42px_42px]"></div>
-    </div>
-
-    <div
-      v-if="isDesktop"
-      class="fixed inset-x-0 top-0 z-[70] flex h-9 items-center justify-center border-b border-lime-200/10 bg-[#050705]/80 px-3 backdrop-blur-xl"
-      :class="isMacDesktop ? 'pl-20' : isWindowsDesktop ? 'pr-[8.625rem]' : ''"
-      data-tauri-drag-region
-    >
-      <div class="pointer-events-none font-mono text-[10px] uppercase tracking-[0.34em] text-lime-200/35" data-tauri-drag-region>Picoder</div>
-      <div v-if="isWindowsDesktop" class="windows-caption-controls">
-        <button class="windows-caption-button" type="button" aria-label="Minimize window" title="Minimize" @click="controlDesktopWindow('minimize')">
-          <span aria-hidden="true">&#xE921;</span>
-        </button>
-        <button class="windows-caption-button" type="button" aria-label="Maximize window" title="Maximize" @click="controlDesktopWindow('maximize')">
-          <span aria-hidden="true">&#xE922;</span>
-        </button>
-        <button class="windows-caption-button windows-caption-close" type="button" aria-label="Close window" title="Close" @click="controlDesktopWindow('close')">
-          <span aria-hidden="true">&#xE8BB;</span>
-        </button>
-      </div>
-    </div>
-
-    <section v-if="!canUseConsole" class="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 sm:px-8 lg:px-10" :class="isDesktop ? 'pt-14' : ''">
-      <header class="flex items-center justify-between border-b border-lime-200/10 pb-5">
-        <div class="flex items-center gap-3">
-          <div class="grid h-10 w-10 place-items-center rounded-2xl border border-lime-200/20 bg-lime-300 text-sm font-black text-black shadow-[0_0_35px_rgba(190,242,100,0.25)]">π</div>
-          <div>
-            <p class="font-serif text-xl italic tracking-tight text-lime-100">PiCoder</p>
-            <p class="font-mono text-[10px] uppercase tracking-[0.34em] text-lime-200/45">remote agent console</p>
-          </div>
-        </div>
-      </header>
-
-      <div class="grid flex-1 items-center gap-10 py-12 lg:grid-cols-[1.05fr_0.95fr]">
-        <section class="relative z-10">
-          <p class="mb-5 inline-flex rounded-full border border-lime-200/15 bg-lime-200/5 px-3 py-1 font-mono text-xs uppercase tracking-[0.28em] text-lime-200/70">Google-only access</p>
-          <h1 class="max-w-3xl font-serif text-6xl italic leading-[0.88] tracking-[-0.06em] text-lime-50 sm:text-7xl lg:text-8xl">Control your coding agent from anywhere.</h1>
-          <p class="mt-7 max-w-xl text-lg leading-8 text-stone-400">Sign in or register with Google to open your remote coding sessions.</p>
-          <div v-if="auth.error" class="mt-6 max-w-xl rounded-2xl border border-red-300/25 bg-red-500/10 px-4 py-3 text-sm text-red-100">{{ auth.error }}</div>
-          <button class="group mt-9 inline-flex items-center justify-center gap-3 rounded-full bg-lime-300 px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.18em] text-black shadow-[0_20px_80px_rgba(190,242,100,0.25)] transition hover:-translate-y-0.5 hover:bg-lime-200" type="button" @click="continueWithGoogle">
-            <span class="grid h-6 w-6 place-items-center rounded-full bg-white font-sans text-base font-black">G</span>
-            Continue with Google
-            <span class="transition group-hover:translate-x-1">→</span>
-          </button>
-        </section>
-      </div>
-    </section>
-
-    <section v-else class="relative grid grid-rows-[auto_1fr] overflow-hidden lg:grid-cols-[5.25rem_22rem_1fr] lg:grid-rows-1" :class="isDesktop ? 'mt-9 h-[calc(100vh-2.25rem)]' : 'h-screen'">
-      <nav class="z-30 flex items-center justify-between border-b border-lime-200/10 bg-[#080a08]/90 px-4 py-3 backdrop-blur-xl lg:flex-col lg:border-b-0 lg:border-r lg:px-3 lg:py-5">
-        <div class="flex items-center gap-3 lg:flex-col">
-          <div class="grid h-11 w-11 place-items-center rounded-2xl bg-lime-300 font-black text-black shadow-[0_0_40px_rgba(190,242,100,0.28)]">π</div>
-          <button
-            class="grid h-11 w-11 place-items-center rounded-2xl border text-lg transition"
-            :class="activeMenu === 'code' ? 'border-lime-300/40 bg-lime-300/15 text-lime-200' : 'border-stone-800 text-stone-500 hover:border-stone-600 hover:text-stone-200'"
-            type="button"
-            title="Code sessions"
-            @click="openCodeMenu"
-          >
-            &lt;/&gt;
-          </button>
-        </div>
-
-        <div class="flex items-center gap-3 lg:flex-col">
-          <div class="hidden text-center font-mono text-[10px] uppercase tracking-[0.2em] text-stone-600 lg:block">{{ firstName }}</div>
-          <button class="rounded-full border border-stone-800 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-stone-400 transition hover:border-red-300/40 hover:text-red-100" type="button" @click="auth.logout()">Logout</button>
-        </div>
-      </nav>
-
-      <aside
-        class="fixed inset-y-0 left-0 z-40 w-[88vw] max-w-sm border-r border-lime-200/10 bg-[#0c0f0b]/95 p-4 shadow-2xl shadow-black/60 backdrop-blur-2xl transition-transform duration-300 lg:static lg:z-10 lg:w-auto lg:max-w-none lg:translate-x-0 lg:bg-[#0c0f0b]/80"
-        :class="sessionListOpen ? 'translate-x-0' : '-translate-x-full'"
+  <main class="min-h-screen bg-black font-sans text-[#e2e2e2] selection:bg-[#e87e53]/30">
+    <div class="flex h-[100dvh] w-full overflow-hidden bg-[#202020] md:rounded-xl md:border md:border-[#393939]/30">
+      <AuthLayout
+        v-if="!canUseConsole"
+        :is-desktop="isDesktop"
+        :is-mac-desktop="isMacDesktop"
+        :is-windows-desktop="isWindowsDesktop"
+        @window-control="controlDesktopWindow"
       >
-        <div class="mb-5 flex items-center justify-between">
-          <div>
-            <p class="font-mono text-[10px] uppercase tracking-[0.34em] text-lime-200/45">tap code</p>
-            <h2 class="font-serif text-3xl italic tracking-tight text-lime-50">Sessions</h2>
-          </div>
-          <button class="rounded-full border border-stone-800 px-3 py-2 text-stone-400 lg:hidden" type="button" @click="sessionListOpen = false">✕</button>
-        </div>
+        <LoginPage :error="auth.error" :is-desktop="isDesktop" @continue-google="continueWithGoogle" />
+      </AuthLayout>
 
-        <div class="space-y-3 overflow-y-auto pb-24 lg:h-[calc(100vh-7rem)] lg:pb-3">
-          <button
-            v-for="session in sessions.sessions"
-            :key="session.id"
-            class="w-full rounded-[1.35rem] border p-4 text-left transition hover:-translate-y-0.5 hover:border-lime-200/30 hover:bg-lime-200/5"
-            :class="session.id === sessions.activeSessionId ? 'border-lime-300/35 bg-lime-300/10 shadow-[0_18px_70px_rgba(190,242,100,0.08)]' : 'border-stone-800 bg-black/20'"
-            type="button"
-            @click="selectSession(session.id)"
-          >
-            <div class="mb-3 flex items-start justify-between gap-3">
-              <div>
-                <p class="font-semibold text-stone-100">{{ session.title }}</p>
-                <p class="mt-1 font-mono text-xs text-stone-500">{{ session.repo }}</p>
-              </div>
-              <span class="rounded-full px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em]" :class="session.status === 'online' ? 'bg-lime-300/15 text-lime-200' : session.status === 'idle' ? 'bg-amber-300/15 text-amber-200' : 'bg-stone-700/50 text-stone-400'">{{ session.status }}</span>
-            </div>
-            <div class="flex items-center justify-between font-mono text-[11px] text-stone-500">
-              <span>{{ session.branch }}</span>
-              <span>{{ session.updatedAt }}</span>
-            </div>
-          </button>
-        </div>
-      </aside>
-
-      <button v-if="sessionListOpen" class="fixed inset-0 z-30 bg-black/60 lg:hidden" type="button" aria-label="Close session list" @click="sessionListOpen = false"></button>
-
-      <section class="grid min-h-0 grid-rows-[auto_1fr_auto] bg-[#070907]/70">
-        <header class="border-b border-lime-200/10 bg-[#070907]/75 px-4 py-4 backdrop-blur-xl sm:px-6">
-          <div class="flex items-center justify-between gap-4">
-            <div class="min-w-0">
-              <button class="mb-2 rounded-full border border-stone-800 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-stone-400 lg:hidden" type="button" @click="sessionListOpen = true">Sessions</button>
-              <h1 class="truncate font-serif text-3xl italic tracking-tight text-lime-50 sm:text-4xl">{{ activeSession?.title }}</h1>
-              <p class="mt-1 truncate font-mono text-xs text-stone-500">{{ activeSession?.repo }} · {{ activeSession?.branch }}</p>
-            </div>
-            <div class="rounded-2xl border border-lime-200/10 bg-black/30 px-4 py-3 text-right font-mono text-xs">
-              <p class="uppercase tracking-[0.22em] text-stone-500">stream</p>
-              <p :class="sessions.isStreaming ? 'text-lime-300' : 'text-stone-300'">{{ sessions.isStreaming ? 'receiving' : 'ready' }}</p>
-            </div>
-          </div>
-        </header>
-
-        <div ref="transcriptEl" class="min-h-0 overflow-y-auto px-4 py-5 sm:px-6 lg:px-10">
-          <div class="mx-auto max-w-4xl space-y-5">
-            <article
-              v-for="message in activeMessages"
-              :key="message.id"
-              class="flex gap-3"
-              :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
-            >
-              <div
-                class="max-w-[88%] whitespace-pre-wrap rounded-[1.5rem] border px-4 py-3 leading-7 shadow-xl sm:max-w-[76%]"
-                :class="message.role === 'user' ? 'border-lime-300/30 bg-lime-300 text-black shadow-lime-950/20' : 'border-stone-800 bg-[#10140f] text-stone-200 shadow-black/30'"
-              >
-                <p class="mb-2 font-mono text-[10px] uppercase tracking-[0.24em]" :class="message.role === 'user' ? 'text-black/55' : 'text-lime-200/45'">{{ message.role === 'user' ? 'you' : 'pi agent' }}</p>
-                {{ message.content }}<span v-if="sessions.streamingSessionId === activeSession?.id && message === activeMessages[activeMessages.length - 1]" class="ml-1 inline-block h-4 w-2 animate-pulse bg-lime-300 align-middle"></span>
-              </div>
-            </article>
-          </div>
-        </div>
-
-        <form class="border-t border-lime-200/10 bg-[#080a08]/95 px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-10" @submit.prevent="submitPrompt">
-          <div class="mx-auto flex max-w-4xl flex-col gap-3 rounded-[1.75rem] border border-lime-200/15 bg-black/40 p-3 shadow-2xl shadow-black/40 sm:flex-row sm:items-end">
-            <label class="sr-only" for="prompt">Prompt</label>
-            <textarea
-              id="prompt"
-              v-model="prompt"
-              class="min-h-24 flex-1 resize-none bg-transparent px-2 py-2 text-base leading-7 text-stone-100 outline-none placeholder:text-stone-600 sm:min-h-16"
-              placeholder="Ask Pi to edit files, run tests, inspect errors..."
-              rows="2"
-              @keydown.enter.exact.prevent="submitPrompt"
-            ></textarea>
-            <button
-              class="rounded-2xl bg-lime-300 px-5 py-4 font-mono text-xs font-bold uppercase tracking-[0.2em] text-black transition hover:bg-lime-200 disabled:cursor-not-allowed disabled:opacity-40"
-              type="submit"
-              :disabled="!prompt.trim() || sessions.isStreaming"
-            >
-              Send
-            </button>
-          </div>
-        </form>
-      </section>
-    </section>
+      <MainLayout
+        v-else
+        :is-desktop="isDesktop"
+        :is-mac-desktop="isMacDesktop"
+        :is-windows-desktop="isWindowsDesktop"
+        :active-session="activeSession"
+        :sessions="sessions.sessions"
+        :active-session-id="sessions.activeSessionId"
+        :first-name="firstName"
+        :session-list-open="sessionListOpen"
+        @toggle-sidebar="sessionListOpen = !sessionListOpen"
+        @close-sidebar="sessionListOpen = false"
+        @select-session="selectSession"
+        @logout="auth.logout()"
+        @window-control="controlDesktopWindow"
+      >
+        <ChatPage
+          ref="chatPage"
+          :active-session="activeSession"
+          :messages="activeMessages"
+          :streaming-session-id="sessions.streamingSessionId"
+          :is-streaming="sessions.isStreaming"
+          :prompt="prompt"
+          @update:prompt="prompt = $event"
+          @submit-prompt="submitPrompt"
+        />
+      </MainLayout>
+    </div>
   </main>
 </template>

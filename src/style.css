@@ -1,14 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap');
 @import 'tailwindcss';
 
 @theme {
-  --font-serif: 'Fraunces', 'Georgia', serif;
-  --font-mono: 'IBM Plex Mono', 'SFMono-Regular', monospace;
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'SFMono-Regular', monospace;
 }
 
 :root {
   color-scheme: dark;
-  font-family: 'IBM Plex Mono', ui-monospace, monospace;
-  background: #070907;
+  font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  background: #000;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -17,6 +19,16 @@
 
 body {
   margin: 0;
+  background: #000;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 button {
