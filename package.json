@@ -1,0 +1,42 @@
+{
+  "name": "picoder-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "desktop:serve": "tauri dev",
+    "macos:debug": "tauri build -t x86_64-apple-darwin -d && node scripts/copy_artifacts.js x86_64-apple-darwin debug",
+    "macos:build": "tauri build -t x86_64-apple-darwin && node scripts/copy_artifacts.js x86_64-apple-darwin release",
+    "windows:debug": "tauri build -t x86_64-pc-windows-gnu -d && node scripts/copy_artifacts.js x86_64-pc-windows-gnu debug",
+    "windows:build": "tauri build -t x86_64-pc-windows-gnu && node scripts/copy_artifacts.js x86_64-pc-windows-gnu release",
+    "android:open": "vite build -- --after-build='cap sync android && cap open android'",
+    "android:serve": "vite -- --after-serve='cap run android -l --port 3562'",
+    "android:debug": "vite build -- --after-build='cap sync android && cap run android' && node scripts/copy_artifacts.js android debug",
+    "android:build": "vite build -- --after-build='cap sync android && cap build android' && node scripts/copy_artifacts.js android release",
+    "serve": "vite --host",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "pinia": "^3.0.4",
+    "vue": "^3.5.34"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.4.0",
+    "@capacitor/core": "^8.4.0",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@tailwindcss/vite": "^4.3.0",
+    "@tauri-apps/api": "^2.11.0",
+    "@tauri-apps/cli": "^2.11.2",
+    "@tauri-apps/plugin-fs": "~2.5.1",
+    "@tauri-apps/plugin-opener": "~2.5.4",
+    "@tauri-apps/plugin-os": "~2.3.2",
+    "@vitejs/plugin-vue": "^6.0.6",
+    "tailwindcss": "^4.3.0",
+    "vite": "^8.0.12",
+    "vite-plugin-argv": "^0.1.0"
+  }
+}

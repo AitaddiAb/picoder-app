@@ -1,0 +1,48 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Picoder",
+  "version": "0.0.0",
+  "identifier": "app.picoder.client",
+  "mainBinaryName": "picoder",
+  "build": {
+    "frontendDist": "../build/spa",
+    "devUrl": "http://localhost:3562",
+    "beforeDevCommand": "pnpm serve",
+    "beforeBuildCommand": "pnpm build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Picoder",
+        "width": 1080,
+        "height": 640,
+        "minWidth": 360,
+        "minHeight": 480,
+        "resizable": true,
+        "transparent": true,
+        "decorations": false,
+        "maximized": true
+      }
+    ],
+    "macOSPrivateApi": true,
+    "security": {
+      "csp": {
+        "default-src": "'self' data: blob: https: http: ipc:"
+      }
+    },
+    "withGlobalTauri": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis", "dmg"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/64x64.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

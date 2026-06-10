@@ -1,0 +1,28 @@
+{
+  "appId": "app.picoder.client.cap",
+  "appName": "Picoder",
+  "webDir": "build/spa",
+  "backgroundColor": "#020617",
+  "server": {
+    "cleartext": true,
+    "androidScheme": "http"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "launchShowDuration": 2000,
+      "launchFadeOutDuration": 500
+    }
+  },
+  "android": {
+    "path": "src-cap/android",
+    "allowMixedContent": true,
+    "buildOptions": {
+      "releaseType": "APK",
+      "signingType": "apksigner"
+    }
+  },
+  "ios": {
+    "path": "src-cap/ios"
+  }
+}
